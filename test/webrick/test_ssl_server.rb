@@ -27,6 +27,14 @@ class TestWEBrickSSLServer < Test::Unit::TestCase
     )
   end
 
+  def test_self_signed_cert_server_with_alt_name
+    assert_self_signed_cert(
+      :SSLEnable => true,
+      :SSLCertName => "/C=JP/O=www.ruby-lang.org/CN=Ruby",
+      :SSLCertAltName => "DNS:www.ruby-lang.org"
+    )
+  end
+
   def assert_self_signed_cert(config)
     TestWEBrick.start_server(Echo, config){|server, addr, port, log|
       io = TCPSocket.new(addr, port)
@@ -34,6 +42,11 @@ class TestWEBrickSSLServer < Test::Unit::TestCase
       sock.connect
       sock.puts(server.ssl_context.cert.subject.to_s)
       assert_equal("/C=JP/O=www.ruby-lang.org/CN=Ruby\n", sock.gets, log.call)
+      if config[:SSLCertAltName]
+        san = server.ssl_context.cert.extensions.find { |e| 'subjectAltName' == e.oid }
+        sock.puts(san.value)
+        assert_equal(config[:SSLCertAltName], sock.gets.strip, log.call)
+      end
       sock.close
       io.close
     }
