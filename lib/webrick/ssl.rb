@@ -124,7 +124,7 @@ module WEBrick
       ef = OpenSSL::X509::ExtensionFactory.new(nil,cert)
       ef.issuer_certificate = cert
       cert.extensions = [
-        ef.create_extension("basicConstraints","CA:FALSE"),
+        ef.create_extension("basicConstraints","CA:TRUE"),
         ef.create_extension("keyUsage", "keyEncipherment, dataEncipherment, digitalSignature, cRLSign, keyCertSign"),
         ef.create_extension("subjectKeyIdentifier", "hash"),
         ef.create_extension("extendedKeyUsage", "serverAuth"),
